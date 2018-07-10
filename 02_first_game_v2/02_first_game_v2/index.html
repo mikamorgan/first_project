@@ -205,6 +205,10 @@ function hitBomb (player, bomb)
     //Add and update the death count
     deathCount += 1;
     deathText.setText('deaths: ' + deathCount);
+	
+    //Reset the score to zero	
+    score = 0;
+    scoreText.setText('score : ' + score);
 }
 
 </script>
