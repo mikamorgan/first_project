@@ -36,11 +36,15 @@ var stars;
 var bombs;
 var platforms;
 var cursors;
+var keepPlay = true;
 var score = 0;
 var deathCount = 0;
 var gameOver = false;
 var scoreText;
 var deathText;
+var timer;
+var timerEvent;
+var timeText;
 
 var game = new Phaser.Game(config);
 
@@ -50,6 +54,10 @@ function preload ()
     this.load.image('ground', 'assets/platform.png');
     this.load.image('star', 'assets/star.png');
     this.load.image('bomb', 'assets/bomb.png');
+    this.load.audio('bomb', 'assets/EXPLODE.wav');
+    this.load.audio('collection', 'assets/LITBEAM2.wav');
+    this.load.audio('walk', 'assets/footsteps.mp3');
+    this.load.audio('end', 'assets/gameOver.mp3');
     this.load.spritesheet('nurse', 'assets/nurse_joy.png', { frameWidth: 68, frameHeight: 72 });
 }
 
@@ -76,6 +84,12 @@ function create ()
     //  Player physics properties. Give the little guy a slight bounce.
     player.setBounce(0.2);
     player.setCollideWorldBounds(true);
+
+    //Add sound effectS
+    this.bombSound = this.sound.add("bomb");
+    this.collectionSound = this.sound.add("collection");
+    this.walkSound = this.sound.add("walk");
+    this.endSound = this.sound.add("end");
 
     //  Our player animations, turning, walking left and walking right.
     this.anims.create({
@@ -123,6 +137,9 @@ function create ()
     //  The death count display
     deathText = this.add.text(550, 500, 'deaths: 0', { fontSize: '32px', fill: '#000' });
 
+    //The timer display
+    timedEvent = this.time.delayedCall(120000, onEvent, [], this);
+
     //  Collide the player and the stars with the platforms
     this.physics.add.collider(player, platforms);
     this.physics.add.collider(stars, platforms);
@@ -141,17 +158,22 @@ function update ()
         return;
     }
 
-    if (cursors.left.isDown)
+    if (cursors.left.isDown && keepPlay)
     {
         player.setVelocityX(-160);
 
         player.anims.play('left', true);
+
+        //this.walkSound.play();
+
     }
-    else if (cursors.right.isDown)
+    else if (cursors.right.isDown && keepPlay)
     {
         player.setVelocityX(160);
 
         player.anims.play('right', true);
+
+        //this.walkSound.play();
     }
     else
     {
@@ -168,6 +190,8 @@ function update ()
 
 function collectStar (player, star)
 {
+    this.collectionSound.play();
+
     star.disableBody(true, true);
 
     //Add and update the score
@@ -196,11 +220,7 @@ function collectStar (player, star)
 
 function hitBomb (player, bomb)
 {
-    //this.physics.pause();
-
-    //player.setTint(0xff0000);
-
-    //player.anims.play('turn');
+    this.bombSound.play();
 
     //Add and update the death count
     deathCount += 1;
@@ -208,7 +228,34 @@ function hitBomb (player, bomb)
 	
     //Reset the score to zero	
     score = 0;
-    scoreText.setText('score : ' + score);
+    scoreText.setText('score: ' + score);
+}
+
+function onEvent ()
+{
+    this.endSound.play();
+
+    console.log("game ended"); 
+
+    this.physics.pause();
+
+    var endText = this.add.text(30, 100, 'GAME OVER', { fontSize: '135px', fill: '#FFFFFF' });
+
+    endText = this.add.text(175, 250, 'score: ', { fontSize: '60px', fill: '#FFFFFF' });
+    endText.setText('End score: ' + score);
+
+    endText = this.add.text(175, 310, '- deaths: ', { fontSize: '60px', fill: '#FFFFFF' });
+    endText.setText('- deaths: ' + deathCount);
+
+    endText = this.add.text(175, 310, '_______________________________', { fontSize: '60px', fill: '#FFFFFF' });
+    
+    endText = this.add.text(175, 370, 'Final score: ', { fontSize: '60px', fill: '#FFFFFF' });
+    endText.setText('Final score: ' + (score - deathCount));
+
+    player.setTint(0xff0000);
+
+    keepPlay = false;
+
 }
 
 </script>
