@@ -138,6 +138,7 @@ function create ()
     deathText = this.add.text(550, 500, 'deaths: 0', { fontSize: '32px', fill: '#000' });
 
     //The timer display
+    timeText = this.add.text(500, 16, 'game end: ', { fontSize: '32px', fill: '#000' });
     timedEvent = this.time.delayedCall(120000, onEvent, [], this);
 
     //  Collide the player and the stars with the platforms
@@ -153,6 +154,20 @@ function create ()
 
 function update ()
 {
+    //display the time
+    var first = true;
+    var number = 120 - timedEvent.getElapsedSeconds();
+    var roundedNumber = Math.round(number);
+
+    if(roundedNumber > 60){
+        timeText.setText('game end: 01:' + (roundedNumber - 60));
+    }
+    else if(roundedNumber < 10){
+        timeText.setText('game end: 00:0' + roundedNumber);
+    }
+    else
+        timeText.setText('game end: 00:' + roundedNumber);
+
     if (gameOver)
     {
         return;
